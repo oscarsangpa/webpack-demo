@@ -1,0 +1,6 @@
+ident_style = tab
+end_of_line = crlf
+insert_final_newline = true
+tab-width = 2
+charset = utf-8
+trim_trailing_whitespace = true

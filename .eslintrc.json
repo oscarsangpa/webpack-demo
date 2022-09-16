@@ -34,6 +34,12 @@
         "react"
     ],
     "rules": {
-        "end_of_line": false
+        "end_of_line": 0,
+        "linebreak-style": 0,
+        "arrow-body-style": 0,
+        "indent": 0,
+        "comma-dangle": 0,
+        "quotes": 0
+
     }
 }

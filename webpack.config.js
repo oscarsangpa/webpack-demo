@@ -1,75 +1,97 @@
-const path = require('path');
+// Obtenemos el path del proyecto
+const path = require("path");
 
-// CSS/SASS PLUGINS
+// * PLUGINS Y MINIFICADORES de CSS / SCSS y SASS
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const { SourceMapDevToolPlugin } = require("webpack");
+/* const ESLintWebpackPlugin = require("eslint-webpack-plugin"); */
 
-const HtmlWebpackPlugin = require("html-webpack-plugin"); // para el template del HTML que usará webpack
-const MiniCssExtractPlugin = require("mini-css-extract-plugin"); // para reducir los CSS
-const { SourceMapDevToolPlugin } = require("webpack"); // para conocer el Source Map de nuestro proyecto
+// ! ESLint loader is deprecated so it must be replaced by eslint-webpack-plugin
+// TODO: fix the class constructor issue to get it working properly.
+// Until that happen, Eslint code is commented to avoid errors
 
-// port config
-
+// Aquí configuramos el puerto en el que Webpack va a ejecutarse
+// La variable PORT debería estar en los archivos .env del proyecto
+// Si no, desplegará en localhost:3000
 const port = process.env.PORT || 3000;
 
-// export config Webpack
-
+// Definimos y exportamos la CONFIGURACIÓN DE WEBPACK
 module.exports = {
-  entry: './src/index.jsx',
+  entry: "./src/index.jsx",
   output: {
-    path: path.join(__dirname, '/dist'),
-    filename: 'bundle.[hash].js',
-    publicPath: '/',
+    path: path.join(__dirname, "/dist"),
+    filename: "bundle.[hash].js",
+    publicPath: "/",
   },
   context: path.resolve(__dirname),
   devServer: {
     port,
-    inline: true,
     historyApiFallback: true,
   },
-  devtool: 'eval-source-map',
+  devtool: "eval-source-map",
   module: {
     rules: [
-      // file JS and JSX rules
-      // pass LINTING to success
+      // Reglas para archivos JS y JSX
+      // Tienen que pasar el linting para poder pasar al compilado final
       {
-        enforce: 'pre',
-        test: /(\.js|\.jsx)$/,
+        enforce: "pre",
+        test: /(\.js|.jsx)$/,
         exclude: /node_modules/,
-        use: ["eslint-loader", "source-map-loader"],
+        use: [
+      /*       "eslint-webpack-plugin",  */
+            "source-map-loader"],
       },
-      // Babel files JS & JSX rules
+      // Reglas para archivos JS y JSX
+      // Babel ES y JSX
       {
-        test: /(\.js|\.jsx)$/,
+        test: /(\.js|.jsx)$/,
         exclude: /node_modules/,
-        loader: "babel-loader",
-        query: {
-          presets: ["@babel/env", "@babel/react"],
+        use: {
+          loader: "babel-loader",
+          options: {
+            presets: [
+              "@babel/preset-env",
+              {
+                modules: false,
+                targets: "> 0.25%, not dead",
+              },
+              "@babel/react"
+            ],
+            plugins: ["@babel/plugin-transform-runtime"]
+          },
         },
       },
+      // Reglas para archivos SCCS, SASS y CSS
+      // Sirve para minificarlos en un solo archivo y una línea
       {
         test: /(\.css|\.scss|\.sass)$/,
-        loader: [MiniCssExtractPlugin.loader, "css-loader", "sass-loader"],
-      },
-      {
-        test: /\.(png|jpe?g|gif)$/,
         use: [
-          {
-            loader: "file-loader",
-          },
-        ],
+          MiniCssExtractPlugin.loader,
+          "css-loader", "postcss-loader",
+          ],
+      },
+      // Reglas para los archivos de imágenes
+      {
+        test: /\.(png|jpe?g|gif)$/i,
+        use: { loader: "file-loader" },
       },
     ],
   },
   plugins: [
-    // Template HTML
+
+/*     new ESLintWebpackPlugin(myEslintOptions), */
+
     new HtmlWebpackPlugin({
-      template: "./index.html",
+      template: "./public/index.html",
     }),
     new MiniCssExtractPlugin({
-      filename: "./css/styles.css",
+      filename: "./src/styles/css/index.css",
     }),
     new SourceMapDevToolPlugin({
       filename: "[file].map",
     }),
+
   ],
   resolve: {
     extensions: [".js", ".jsx", ".css", ".scss", ".sass"],
